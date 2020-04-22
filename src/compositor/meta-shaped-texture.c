@@ -22,7 +22,12 @@
 /**
  * SECTION:meta-shaped-texture
  * @title: MetaShapedTexture
- * @short_description: An actor to draw a masked texture.
+ * @short_description: A ClutterContent which draws a shaped texture
+ *
+ * A MetaShapedTexture draws a #CoglTexture (often provided from a client
+ * surface) in such a way that it matches any required transformations that
+ * give its final shape, such as a #MetaMonitorTransform, y-invertedness, or a
+ * crop-and-scale operation.
  */
 
 #include "config.h"
@@ -1122,6 +1127,20 @@ meta_shaped_texture_set_transform (MetaShapedTexture    *stex,
   invalidate_size (stex);
 }
 
+/**
+ * meta_shaped_texture_set_viewport_src_rect:
+ * @stex: A #MetaShapedTexture
+ * @src_rect: The viewport source rectangle
+ *
+ * Sets the viewport area that can be used to crop the original texture. The
+ * cropped result can then be optionally scaled afterwards using
+ * meta_shaped_texture_set_viewport_dst_size() as part of a crop-and-scale
+ * operation.
+ *
+ * %NULL is an invalid value for @src_rect. Use
+ * meta_shaped_texture_reset_viewport_src_rect() if you want to remove the
+ * cropping source rectangle.
+ */
 void
 meta_shaped_texture_set_viewport_src_rect (MetaShapedTexture *stex,
                                            graphene_rect_t   *src_rect)
@@ -1150,6 +1169,21 @@ meta_shaped_texture_reset_viewport_src_rect (MetaShapedTexture *stex)
   invalidate_size (stex);
 }
 
+/**
+ * meta_shaped_texture_set_viewport_dst_size:
+ * @stex: #MetaShapedTexture
+ * @dst_width: The final viewport width (> 0)
+ * @dst_width: The final viewport height (> 0)
+ *
+ * Sets a viewport size on @stex of the given @width and @height, which will
+ * lead to scaling the texture. If you need to have cropping, use
+ * meta_shaped_texture_set_viewport_src_rect() first, after which the scaling
+ * stemming from this method will be applied.
+ *
+ * If you no longer want to have any scaling, use
+ * meta_shaped_texture_reset_viewport_dst_size() to clear the current
+ * parameters.
+ */
 void
 meta_shaped_texture_set_viewport_dst_size (MetaShapedTexture *stex,
                                            int                dst_width,
@@ -1465,6 +1499,12 @@ meta_shaped_texture_get_buffer_scale (MetaShapedTexture *stex)
   return stex->buffer_scale;
 }
 
+/**
+ * meta_shaped_texture_get_width:
+ * @stex: A #MetaShapedTexture
+ *
+ * Returns: The final width of @stex after its shaping operations are applied.
+ */
 int
 meta_shaped_texture_get_width (MetaShapedTexture *stex)
 {
@@ -1475,6 +1515,12 @@ meta_shaped_texture_get_width (MetaShapedTexture *stex)
   return stex->dst_width;
 }
 
+/**
+ * meta_shaped_texture_get_height:
+ * @stex: A #MetaShapedTexture
+ *
+ * Returns: The final height of @stex after its shaping operations are applied.
+ */
 int
 meta_shaped_texture_get_height (MetaShapedTexture *stex)
 {
